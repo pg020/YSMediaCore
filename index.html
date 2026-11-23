@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>YSMediaCore</title>
+<style>
+  :root{
+    --bg:#1c0e10; --panel:#2a1417; --line:#4a2226; --text:#fbefe3; --dim:#c9a396;
+    --accent:#f2784b; --video:#ff9a5c; --audio:#fada53; --image:#f7b2a0;
+    --accent-ink:#2a0d0a; --thumb:#0e1013; --folder:#1a1d23; --audio-a:#3a2a14; --audio-b:#1c120a;
+    --hover:#fff; --head:#fff; --r:6px; --rb:4px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font:12px/1.4 "Segoe UI",system-ui,sans-serif;user-select:none;overflow:hidden}
+  #app{display:flex;flex-direction:column;height:100%}
+  /* brand bar */
+  #brand{flex:none;display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid var(--line);background:var(--chrome,transparent)}
+  #brand .logo{flex:none;width:28px;height:28px;border-radius:7px;display:block}
+  #brand .bt{flex:1 1 auto;min-width:0}
+  #brand .bn{font-size:13px;font-weight:700;letter-spacing:.05em;line-height:1.15;white-space:nowrap;color:var(--head)}
+  #brand .bn span{color:var(--accent);font-weight:600}
+  #brand .tg{font-size:10px;letter-spacing:.06em;color:var(--dim);margin-top:1px;white-space:nowrap}
+
+  header{padding:8px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+  .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  button,input{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--rb);padding:4px 8px}
+  button{cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button:focus-visible,input:focus-visible,.tile:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  #path{flex:1 1 100%;min-width:0;order:5;display:flex;flex-wrap:wrap;gap:2px 4px;color:var(--dim);line-height:1.5}
+  .crumb{cursor:pointer}
+  .crumb:hover{color:var(--accent)}
+  .crumb.cur{color:var(--text);cursor:default}
+  .sep{opacity:.5}
+  button:disabled{opacity:.4;cursor:default}
+  button:disabled:hover{border-color:var(--line)}
+  #search{flex:1 1 100%;min-width:0}
+  #size,#vol{flex:none;width:62px;text-align:center}
+  .ctl{flex-wrap:nowrap}
+  .ctl .lbl{width:30px}
+  .ctl input[type=range]{flex:1 1 auto;min-width:0;padding:0;accent-color:var(--accent)}
+  .lbl{color:var(--dim)}
+  /* icons (layout unchanged) */
+  #back,#fwd,#up,#choose{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  #back svg,#fwd svg,#up svg,#choose svg{width:15px;height:15px;flex:none}
+  .searchbox{position:relative;flex:1 1 100%;min-width:0;display:block}
+  .searchbox svg{position:absolute;left:9px;top:50%;width:14px;height:14px;margin-top:-7px;color:var(--dim);pointer-events:none}
+  .searchbox #search{width:100%;padding-left:29px}
+  .flt{display:inline-flex;align-items:center;gap:6px}
+  .flt::before{content:"";width:8px;height:8px;border-radius:50%;border:2px solid var(--c);box-sizing:border-box;flex:none}
+  .flt[data-f=video]{--c:var(--video)}.flt[data-f=audio]{--c:var(--audio)}.flt[data-f=image]{--c:var(--image)}
+  .flt.on,body.has-bg .flt.on{background:var(--ctl,var(--panel));color:var(--text);border-color:var(--c)}
+  .flt.on::before{background:var(--c)}
+  .flt:not(.on){opacity:.6}
+  #grid{flex:1;overflow:auto;padding:8px;display:grid;gap:8px;
+    grid-template-columns:repeat(auto-fill,minmax(var(--tile,140px),1fr));align-content:start;row-gap:14px;column-gap:10px}
+  .tile{background:none;border:0;border-radius:var(--r);cursor:pointer;min-width:0}
+  .tile:hover .thumb{border-color:var(--accent)}
+  .tile:hover .name{color:var(--hover)}
+  .thumb{position:relative;height:0;padding-top:62.5%;background:var(--thumb);overflow:hidden;border:1px solid var(--line);border-radius:var(--r)}
+  .thumb img,.thumb video{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .glyph svg{width:30px;height:30px;fill:currentColor}
+  .thumb .glyph{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px}
+  .tile[data-type=audio] .thumb{background:linear-gradient(135deg,var(--audio-a),var(--audio-b));color:var(--audio)}
+  .tile[data-type=folder] .thumb{color:var(--dim);background:var(--folder)}
+  .tile[data-type=video] .thumb{color:var(--video)}
+  .tile[data-type=image] .thumb{color:var(--image)}
+  .thumb canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+  .head{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--head);box-shadow:0 0 4px rgba(128,128,128,.6);display:none;pointer-events:none}
+  .ghost{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.5);display:none;pointer-events:none}
+  .tile.live .ghost{display:block}
+  .tile.started .head{display:block}
+  .tile.started .time{display:block}
+  .pbtn{position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;pointer-events:none;color:#fff}
+  .pbtn svg{width:16px;height:16px;fill:currentColor}
+  .tile[data-type=audio].live .pbtn{display:flex}
+  .tile.playing .thumb{border-color:var(--audio);box-shadow:0 0 0 1px var(--audio)}
+  .tile.playing .name{color:var(--audio)}
+  .bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent);pointer-events:none}
+  .time{position:absolute;right:4px;top:4px;background:rgba(0,0,0,.7);padding:0 4px;border-radius:3px;font-size:10px;display:none}
+  .tile.live .time{display:block}
+  .durbadge{position:absolute;right:4px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;padding:0 5px;border-radius:3px;font-size:10px;line-height:16px;display:none;pointer-events:none}
+  .durbadge.has{display:block}
+  .meta{padding:5px 2px 0;min-width:0;color:var(--text)}
+  .name{display:block;line-height:1.35;max-height:2.7em;overflow:hidden;word-break:break-all;color:var(--text);text-align:center}
+  .sub{display:none;color:var(--dim);font-size:11px;margin-top:2px}
+
+  #count{color:var(--dim);margin-left:auto;white-space:nowrap}
+  #empty{grid-column:1/-1;color:var(--dim);padding:24px 8px;text-align:center}
+  #status{padding:6px 8px;border-top:1px solid var(--line);color:var(--dim);min-height:28px;display:flex;align-items:flex-start;gap:8px}
+  #msg{flex:1 1 auto;min-width:0}
+  .x{flex:none;width:22px;height:22px;padding:0;border:0;background:none;color:var(--dim);font-size:18px;line-height:20px;text-align:center;border-radius:4px}
+  .x:hover{color:var(--hover);background:var(--line);border-color:transparent}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<div id="app">
+  <div id="brand">
+    <img class="logo" src="assets/logo.png" alt="YS" draggable="false">
+    <div class="bt"><div class="bn">YS<span>MediaCore</span></div><div class="tg">Browse. Preview. Import.</div></div>
+  </div>
+  <header>
+    <div class="row">
+      <button id="back" title="Back to the previous folder (or mouse back button)" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+      <button id="fwd" title="Forward" aria-label="Forward"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      <button id="up" title="Go up one folder" aria-label="Up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+      <button id="choose" title="Pick your media folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Browse</span></button>
+      <span id="path"></span>
+    </div>
+    <div class="row">
+      <button data-q="desktop">Desktop</button>
+      <button data-q="downloads">Downloads</button>
+      <button data-q="videos">Videos</button>
+      <button data-q="music">Music</button>
+      <button data-q="pictures">Pictures</button>
+      <span id="count"></span>
+      <button id="gear" title="Settings: theme, colors, background, particles">Settings</button>
+      <button id="help" title="Show the tips again">?</button>
+    </div>
+    <div class="row" id="drives"></div>
+    <div class="row">
+      <label class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="search" placeholder="Search this folder"></label>
+      <button class="flt on" data-f="video">Video</button>
+      <button class="flt on" data-f="audio">Audio</button>
+      <button class="flt on" data-f="image">Image</button>
+    </div>
+    <div class="row ctl">
+      <span class="lbl">Size</span>
+      <input id="size" type="number" min="80" max="400" step="10" value="140" title="Tile width in pixels">
+      <input id="sizeR" type="range" min="80" max="400" step="10" value="140" title="Tile size">
+    </div>
+    <div class="row ctl">
+      <span class="lbl">Vol</span>
+      <input id="vol" type="number" min="0" max="100" step="5" value="70" title="Audio preview volume, 0 to 100">
+      <input id="volR" type="range" min="0" max="100" step="1" value="70" title="Audio preview volume">
+    </div>
+  </header>
+  <div id="grid"></div>
+  <div id="status"><span id="msg"></span><button id="closeHint" class="x" title="Close this tip">×</button></div>
+</div>
+<script src="js/store.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

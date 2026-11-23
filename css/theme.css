@@ -1,0 +1,114 @@
+/* YUESHI MEDIA CORE - appearance layer */
+#app{position:relative;z-index:1}
+#bgLayer{position:absolute;left:0;top:0;right:0;bottom:0;z-index:0;overflow:hidden;pointer-events:none;display:none}
+#bgMedia{position:absolute;left:0;top:0;right:0;bottom:0}
+#bgMedia > video:not(#bgFree){width:100%;height:100%;display:block}
+#bgDim{position:absolute;left:0;top:0;right:0;bottom:0}
+
+header,#status,#brand{background:var(--chrome,transparent)}
+body.has-bg .name{background:var(--pill);border-radius:4px;padding:0 4px}
+body.has-bg #count,body.has-bg #empty{background:var(--pill);border-radius:4px;padding:0 6px}
+body.has-bg header,body.has-bg #status,body.has-bg #brand{text-shadow:var(--tshadow)}
+body.has-bg button:not(.on):not(.tile):not(.x),
+body.has-bg input:not([type=range]):not([type=color]){background:var(--ctl)}
+body.has-bg #path{background:var(--pill);border-radius:4px;padding:1px 6px}
+
+#themePanel{position:absolute;left:0;top:0;right:0;bottom:0;z-index:20;display:flex;flex-direction:column;background:var(--overlay,var(--bg))}
+#themePanel[hidden]{display:none}
+.tp-head{display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--line)}
+.tp-head strong{flex:1;text-align:center}
+.tp-body{flex:1;overflow:auto;padding:4px 10px 14px}
+#themePanel section{padding:10px 0;border-bottom:1px solid var(--line)}
+#themePanel section:last-child{border-bottom:0}
+#themePanel h3{margin:0 0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.tp-row{display:flex;align-items:center;gap:8px;margin:6px 0}
+.tp-lbl{flex:none;width:78px;color:var(--dim)}
+.tp-row input[type=range]{flex:1 1 auto;min-width:0;padding:0;accent-color:var(--accent)}
+.tp-row input[type=color]{width:44px;height:24px;padding:0;border:1px solid var(--line);border-radius:var(--rb);background:none;cursor:pointer}
+.tp-row select{flex:1 1 auto;min-width:0;font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:var(--rb);padding:4px 6px}
+.tp-val{flex:none;width:40px;text-align:right;color:var(--dim)}
+.tp-mini{padding:2px 8px;font-size:11px}
+.tp-note{color:var(--dim);font-size:11px;margin:4px 0;word-break:break-all}
+.tp-presets{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.tp-preset{display:flex;flex-direction:column;align-items:stretch;gap:5px;text-align:left;padding:6px}
+.tp-preset.on{background:var(--panel);color:var(--text);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.tp-preset .sw{display:flex;height:16px;border-radius:3px;overflow:hidden;border:1px solid rgba(128,128,128,.35)}
+.tp-preset .sw i{flex:1}
+.tp-preset .nm{font-size:11px}
+.tp-prev{height:90px;margin-bottom:6px;border:1px dashed var(--line);border-radius:var(--r);background:var(--thumb) center/contain no-repeat;display:flex;align-items:center;justify-content:center;color:var(--dim);overflow:hidden}
+.tp-prev span{padding:0 8px;text-align:center}
+@media (prefers-reduced-motion:reduce){#bgMedia video{display:none}}
+
+
+/* drag & resize editor */
+.tp-wide{flex:1 1 auto}
+#bgEdit{position:absolute;left:0;top:0;right:0;bottom:0;z-index:30;cursor:move}
+#bgEdit[hidden]{display:none}
+#beBox{position:absolute;border:1px dashed var(--accent);box-shadow:0 0 0 1px rgba(0,0,0,.45);pointer-events:none}
+.be-h{position:absolute;width:14px;height:14px;background:var(--accent);border:1px solid #000;border-radius:3px;pointer-events:auto}
+.be-h[data-c=nw]{left:-7px;top:-7px;cursor:nwse-resize}
+.be-h[data-c=se]{right:-7px;bottom:-7px;cursor:nwse-resize}
+.be-h[data-c=ne]{right:-7px;top:-7px;cursor:nesw-resize}
+.be-h[data-c=sw]{left:-7px;bottom:-7px;cursor:nesw-resize}
+.be-bar{position:absolute;left:8px;right:8px;bottom:8px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px;border:1px solid var(--line);border-radius:var(--r);background:var(--overlay,var(--bg));cursor:default}
+.be-tip{flex:1 1 100%;color:var(--dim);font-size:11px}
+
+/* controls / grid divider */
+header>*{flex:none}
+#split{flex:none;height:12px;position:relative;cursor:row-resize;z-index:3}
+#split::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:4px;margin:-2px 0 0 -22px;border-radius:2px;background:var(--dim);opacity:.55}
+#split:hover::after,#split.drag::after{background:var(--accent);opacity:1}
+
+/* tip bar: always solid, full-strength text */
+#status,body.has-bg #status{background:var(--bg);color:var(--text);text-shadow:none}
+#status .x{color:var(--text)}
+
+/* my presets */
+#themePanel .tp-sub{margin:12px 0 6px}
+#tpName{flex:1 1 auto;min-width:0}
+.tp-mine{display:flex;flex-direction:column;gap:5px}
+.tp-mine-row{display:flex;gap:6px;align-items:center}
+.tp-mine-name{flex:1 1 auto;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* folder slide animation */
+@keyframes msSlideL{from{opacity:0;transform:translateX(-56px)}to{opacity:1;transform:none}}
+@keyframes msSlideR{from{opacity:0;transform:translateX(56px)}to{opacity:1;transform:none}}
+.tile.slide-fwd{animation:msSlideL var(--slide-dur,320ms) cubic-bezier(.2,.8,.2,1) backwards}
+.tile.slide-back{animation:msSlideR var(--slide-dur,320ms) cubic-bezier(.2,.8,.2,1) backwards}
+.tp-check{display:flex;gap:8px;align-items:flex-start;line-height:1.35;cursor:pointer}
+.tp-check input{flex:none;margin-top:2px;padding:0}
+
+/* particle overlay: sits above everything but never blocks clicks */
+#particles{position:absolute;left:0;top:0;width:100%;height:100%;z-index:25;pointer-events:none;display:block}
+.tp-num{flex:none;width:62px;text-align:center}
+
+/* hover zoom: the file under the mouse grows, then returns to normal size when the mouse leaves */
+.tile{transition:transform .16s cubic-bezier(.2,.8,.2,1);transform-origin:center center}
+.tile:hover{transform:translate(var(--zx,0px),var(--zy,0px)) scale(var(--zs,var(--zoom,1)));z-index:6}
+
+/* centred hover zoom: no sideways/vertical nudging */
+.tile:hover{transform:scale(var(--zs,var(--zoom,1)))}
+
+/* over a background image, secondary text is shown at full strength (white on dark themes) */
+body.has-bg .lbl,body.has-bg #count,body.has-bg #empty,body.has-bg #path,body.has-bg .crumb,body.has-bg .crumb.cur,
+body.has-bg .sep,body.has-bg #status,body.has-bg #msg,body.has-bg .sub,body.has-bg .tg,body.has-bg .x{color:var(--vis,#fff);opacity:1}
+body.has-bg .sep{opacity:.8}
+body.has-bg input::placeholder{color:var(--vis,#fff);opacity:.85}
+body.has-bg button:disabled{opacity:.6}
+body.has-bg .time,body.has-bg .durbadge{color:#fff}
+
+/* professional polish */
+#brand .bn{text-shadow:none}
+.tp-head{padding:10px}
+.tp-head strong{letter-spacing:.14em;font-size:12px;text-transform:uppercase}
+#themePanel h3{letter-spacing:.12em}
+.tile .thumb{transition:border-color .12s}
+
+/* slim transparent scrollbars with an accent glow */
+::-webkit-scrollbar{width:10px;height:10px;background:transparent}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),var(--audio));border:3px solid transparent;background-clip:padding-box;
+  border-radius:8px;min-height:36px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--audio),var(--accent));border-width:2px;background-clip:padding-box}
+::-webkit-scrollbar-thumb:active{background:var(--accent);background-clip:padding-box}
